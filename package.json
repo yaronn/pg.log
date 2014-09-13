@@ -1,0 +1,13 @@
+{
+  "name": "pglog",
+  "version": "0.0.0",
+  "description": "",
+  "dependencies": {    
+    "optimist": "^0.6.1",
+    "express": "4.3.1",
+    "socket.io": "1.0.2",
+    "tail": "0.4.0"
+  },
+  "main": "index.js",  
+  "author": ""  
+}
