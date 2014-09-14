@@ -6,6 +6,7 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var events = require('events');
+var path = require('path')
 var Tail = require('tail').Tail;
 var argv = require('optimist').argv;
 var lib = argv.d || "/var/lib/postgresql/9.3/main/pg_log/"
@@ -22,7 +23,7 @@ function getLatestFile(dir, files, callback) {
    }
    var newest = { file: files[0] };
    var checked = 0;
-   fs.stat(dir + newest.file, function(err, stats) {
+   fs.stat(path.join(dir, newest.file), function(err, stats) {
       newest.mtime = stats.mtime;
       for (var i = 0; i < files.length; i++) {
          var file = files[i];
@@ -36,7 +37,7 @@ function getLatestFile(dir, files, callback) {
                   callback(err, newest);
                }
             });
-         })(dir + file);
+         })(path.join(dir, file));
    }
 });
 }
@@ -62,7 +63,7 @@ function PgEmitter() {
    getLatestFile(lib, files, function(err, res) {
       
       console.log("watching log file " + res.file)
-      
+
       var tail = new Tail(res.file);
       var last = null;
 
@@ -74,7 +75,7 @@ function PgEmitter() {
             last = "query"
          }
 
-         else if ((m = data.match(/^LOG:\s*duration:(.{1,16})$/)) && (last==="query" || last==="partial")) { 
+         else if ((m = data.match(/^LOG:\s*duration:(.{1,16})$/m)) && (last==="query" || last==="partial")) { 
             emitter.emit("duration", m[1].trim())
             last="duration"
          }
