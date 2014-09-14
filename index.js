@@ -10,7 +10,7 @@ var lib = argv.d || "/var/lib/postgresql/9.3/main/pg_log/"
 var port = argv.p || 3000
 
 
-function getNewestFile(dir, files, callback) {
+function getLatestFile(dir, files, callback) {
     if (!callback) return;
     if (!files || (files && files.length === 0)) {
         callback();
@@ -39,80 +39,75 @@ function getNewestFile(dir, files, callback) {
     });
  }
 
-function getLogFile(cba) {
+function PgEmitter() {	
+	
+	var emitter = new events.EventEmitter();
+
 	var files = fs.readdirSync(lib).filter(function(f) {
-		return f.match(/.log$/)})
-	getNewestFile(lib, files, function(err, res) {
-		cba(err, res.file)
+		return f.match(/.log$/)
 	})
+
+	getLatestFile(lib, files, function(err, res) {
+
+		var tail = new Tail(res.file);
+		var last = null;
+
+		tail.on("line", function(data) {  	  
+			var m;
+			if (m = data.match(/^LOG:\s*(statement|execute <unnamed>):(.*)/)) {
+				pgEmitter.emit("new")	  	
+				emitter.emit("query", m[2].trim())
+				last = "query"
+			}
+
+			else if ((m = data.match(/^LOG:\s*duration:(.{1,16})$/)) && (last==="query" || last==="partial")) { 
+				emitter.emit("duration", m[1].trim())
+				last="duration"
+			}
+
+			else if (!data.match(/^(LOG|DETAIL):/)) {
+				emitter.emit("partial", data)
+				last = "partial"
+			}
+		});	
+	})
+
+	
+	return emitter;	
+
 }
 
-
-
-getLogFile(init)
-
-
-function init(err, file) {
-	var tail = new Tail(file);
-	var last = null;
+app.use(express.static(__dirname + '/public'));
 	
-	tail.on("line", function(data) {  	  
-	  var m;
-	  if (m = data.match(/^LOG:\s*(statement|execute <unnamed>):(.*)/)) {
-	  	logEmitter.emit("new")	  	
-	  	logEmitter.emit("query", m[2].trim())
-	  	last = "query"
-	  }
+app.get('/', function(req, res){	  
+	res.sendfile('./public/index.html');
+});
 
-	  else if ((m = data.match(/^LOG:\s*duration:(.{1,16})$/)) && (last==="query" || last==="partial")) { 
-	  	logEmitter.emit("duration", m[1].trim())
-	  	last="duration"
-	  }
+http.listen(port, function(){
+	console.log('listening on *:' + port);
+});
 
-	  else if (!data.match(/^(LOG|DETAIL):/)) {
-	  	logEmitter.emit("partial", data)
-	  	last = "partial"
-	  }
+var pgEmitter = new PgEmitter()
 
-	});
+pgEmitter.on("new", function() {	
+	io.emit("new")
+	var d = new Date()
+	console.log(d)
+	io.emit("date", d)
+})
 
-	var logEmitter = new events.EventEmitter();
+pgEmitter.on("query", function(data) {		
+	console.log(data)
+	io.emit("query", data)
+})
 
-	app.use(express.static(__dirname + '/public'));
-	
-	app.get('/', function(req, res){	  
-	  res.sendfile('./public/index.html');
-	});
+pgEmitter.on("partial", function(data) {		
+	console.log(data)
+	io.emit("partial", data)
+})
 
-	http.listen(3000, function(){
-	  console.log('listening on *:3000');
-	});
+pgEmitter.on("duration", function(data) {
+	console.log(data)
+	io.emit("duration", data)
+})	
 
-	var log_cba = function(type, data) {
-			 		console.log(type)
-			 		console.log(data)
-					if (type=="query") {
-						
-						io.emit("log", new Date()+ " " + data)
-					}
-					else if (type=="duration") io.emit("log", data)		
-					else if (type=="partial") io.emit("log",data)
-	 			  }
-
-	logEmitter.on("new", function() {
-		io.emit("new")
-		io.emit("date", new Date())
-	})
-
-	logEmitter.on("query", function(data) {		
-		io.emit("query", data)
-	})
-
-	logEmitter.on("partial", function(data) {		
-		io.emit("partial", data)
-	})
-
-	logEmitter.on("duration", function(data) {		
-		io.emit("duration", data)
-	})	
-}
