@@ -45,7 +45,10 @@ Defaults are in the sample above.
 
 Note: pg.log needs access to the postgres log folder or you will get a "permision denied" error. You should grant required permissions or use sudo (though less recomemnded in general).
 
-Now surf to http://localhost:3000/ and once new queries arrive you will see them in the browser.
+
+## Running the server
+
+Surf to http://localhost:3000/ and once new queries arrive you will see them in the browser.
 
 
 <img src="https://raw.githubusercontent.com/yaronn/pg.log/master/public/pg.log.png"  width="420px" />
