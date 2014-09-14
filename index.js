@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var fs = require('fs')
 var express = require('express')
 var app = require('express')();
@@ -65,7 +67,7 @@ function PgEmitter() {
             last="duration"
          }
 
-         else if (!data.match(/^(LOG|DETAIL):/)) {
+         else if (!data.match(/^(LOG|DETAIL|ERROR|STATEMENT):/)) {
             emitter.emit("partial", data)
             last = "partial"
          }
