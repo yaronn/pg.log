@@ -43,7 +43,7 @@ Run:
 
 Defaults are in the sample above.
 
-Note: pg.log needs access to the postgres log folder or you will get a "permision denied" error. You should grant required permissions or use sudo (though less recomemnded in general).
+**Note**: pg.log needs access to the postgres log folder or you will get a "permision denied" error. You should grant required permissions or use sudo (though less recomemnded in general).
 
 
 ## Running the server
