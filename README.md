@@ -4,6 +4,8 @@ Great to see how UI steps affect DB.
 
 Created by Yaron Naveh ([twitter](https://twitter.com/YaronNaveh)).
 
+<img src="https://raw.githubusercontent.com/yaronn/pg.log/master/public/pg.log.png"  width="420px" />
+
 ## Install
 
     npm install pg.log -g
@@ -49,7 +51,5 @@ Defaults are in the sample above.
 ## Viewing queries
 
 Surf to http://localhost:3000/ and once new queries arrive you will see them in the browser.
-
-
 
 <img src="https://raw.githubusercontent.com/yaronn/pg.log/master/public/pg.log.png"  width="420px" />
