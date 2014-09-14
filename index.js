@@ -45,12 +45,22 @@ function PgEmitter() {
 	
    var emitter = new events.EventEmitter();
 
+   if (!fs.existsSync(lib)) {
+       console.log("error: folder " + lib + " does not exist or current user has no permissions to it")
+       process.exit(1)
+   }
+
    var files = fs.readdirSync(lib).filter(function(f) {
       return f.match(/.log$/)
    })
 
-   getLatestFile(lib, files, function(err, res) {
+   if (files.length==0) {
+      console.log("error: the folder " + lib + " contains no log files")
+      process.exit(1)
+   }
 
+   getLatestFile(lib, files, function(err, res) {
+      
       var tail = new Tail(res.file);
       var last = null;
 
