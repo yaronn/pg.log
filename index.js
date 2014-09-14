@@ -61,6 +61,8 @@ function PgEmitter() {
 
    getLatestFile(lib, files, function(err, res) {
       
+      console.log("watching log file " + res.file)
+      
       var tail = new Tail(res.file);
       var last = null;
 
